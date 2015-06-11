@@ -14,10 +14,11 @@
 		</div>
     <div>
       <p><span class="text-muted">input Cloudant Geo query URL:</span><br/>
-      <input id="geoq" type="text" name="geoq" size="128">
-      <button type="button" class="btn btn-primary" onclick="showmap()">Submit Query</button></p>
-      <p class="text-muted"><small>ex: https://opendata.cloudant.com/crimes/_design/SpatialView/_geo/spatial?lat=42.366326&lon=-71.053493&radius=1000&limit=200&include_docs=true</small></p>
+      <input id="geoq" type="text" name="geoq" size="128"><br/>
+      <small class="text-muted">ex: https://opendata.cloudant.com/crimes/_design/SpatialView/_geo/spatial?lat=42.366326&lon=-71.053493&radius=1000&limit=200&include_docs=true</small></p>
+      <button type="button" class="btn btn-primary" onclick="showmap()">Submit Query</button>
     </div>
+    <p> </p>
 		<div id="map" style="width: 100%; height: 400px;border-radius:12px"></div>
 	</div>
 	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
