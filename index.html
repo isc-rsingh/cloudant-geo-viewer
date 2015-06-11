@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Cloudant Geo Viewer</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" type="text/css">
+	<link rel="stylesheet" href="//cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" type="text/css">
+</head>
+<body>
+	<div class="container">
+		<div>
+			<h2>Cloudant Geo Viewer</h2>
+		</div>
+    <div>
+      <p><span class="text-muted">input Cloudant Geo query URL:</span><br/>
+      <input id="geoq" type="text" name="geoq" size="128">
+      <button type="button" class="btn btn-primary" onclick="showmap()">Submit Query</button></p>
+      <p class="text-muted"><small>ex: https://opendata.cloudant.com/crimes/_design/SpatialView/_geo/spatial?lat=42.366326&lon=-71.053493&radius=1000&limit=200&include_docs=true</small></p>
+    </div>
+		<div id="map" style="width: 100%; height: 400px;border-radius:12px"></div>
+	</div>
+	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="//cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+	<script>
+  function showmap() {
+    val = $('#geoq').val();
+    if (val==null) return;
+    cloudantURL = val; // + '&limit=200&include_docs=true';
+    var lat = getQueryParam(val, 'lat');
+    var lon = getQueryParam(val, 'lon');
+    map.panTo(L.latLng(lat, lon));
+
+  	$.getJSON(cloudantURL, null, function onSuccess(data) {
+      if (data.rows) {
+    		for (var i = 0; i < data.rows.length; i++) {
+    			if ( data.rows[i].doc.geometry ) // this skips non-GeoJSON docs, e.g. design documents
+    				geolayer.addData(data.rows[i].doc);
+    		}
+      } else if (data.features) {
+    		for (var i = 0; i < data.features.length; i++) {
+    			if ( data.features[i].geometry ) // this skips non-GeoJSON docs, e.g. design documents
+    				geolayer.addData(data.features[i]);
+    		}
+      } else {
+        alert('Did not understand reponse.');
+      }
+  	});
+  }
+	var map = L.map('map').setView([42.366326, -71.053493], 16);
+
+	L.tileLayer('http://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+		maxZoom: 20,
+		detectRetina: true,
+		id: 'examples.map-20v6611k'
+	}).addTo(map);
+
+	var cloudantURL = '';
+
+	var geolayer = L.geoJson(null, {
+		onEachFeature: onEachFeature
+	}).addTo(map);
+  
+	function onEachFeature(feature, layer) {
+		if ( feature.properties ) {
+			var pop = '';
+			for (var k in feature.properties) {
+				pop += '<b>' + k + ': </b> ' + feature.properties[k] + '<br/>';
+			}
+			layer.bindPopup(pop);
+		}
+	}
+  
+  function getQueryParam(url, key) {
+    var vars = [], hash;
+    var q = url.split('?')[1];
+    if (q != undefined) {
+        q = q.split('&');
+        for(var i = 0; i < q.length; i++){
+            hash = q[i].split('=');
+            vars.push(hash[1]);
+            vars[hash[0]] = hash[1];
+        }
+    }
+    return vars[key];
+  }
+	</script>
+	
+</body>
